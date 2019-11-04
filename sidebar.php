@@ -22,19 +22,24 @@
       <li class="nav-item">
         <a class="nav-link" href="#searchPages" data-toggle="collapse" role="button" aria-expanded="true" aria-controls="sidebarPages">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          Search
+          Inventory
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down float-right"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </a>
         <div class="collapse show sidebarPages" id="searchPages" style="">
           <ul class="nav nav-sm flex-column">
             <li class="nav-item">
-              <a href="searchCustomer.php" class="nav-link ">
-                Search 1
+              <a href="inventory.php" class="nav-link ">
+                All Items
               </a>
             </li>
             <li class="nav-item">
-              <a href="searchLoan.php" class="nav-link ">
-                Search 2
+              <a href="additem.php" class="nav-link ">
+                Add Item
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="updateitem.php" class="nav-link ">
+                Update Item
               </a>
             </li>
           </ul>
