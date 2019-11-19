@@ -180,3 +180,10 @@ body {
 .no-border{
   border: none !important;
 }
+
+.sidebar{
+  z-index: 222222;
+}
+main{
+  z-index: 2;
+}
