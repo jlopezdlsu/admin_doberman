@@ -72,8 +72,8 @@ if(!isset($_SESSION['UserData']['Username'])){
                 if (file_exists("$fileName")) unlink("$fileName");
                 if (move_uploaded_file($_FILES["fileImage"]["tmp_name"], $fileName)) {
 
-                  $sql="INSERT INTO `tbl_product` (`productName`,`brandID`,`categoryID`,`merchantID`,`quantity`,`price`,`ram`,`storage`,`camera`,`processor`,`description`,`shortDescription`)
-                  VALUES ('$productName','$Brand','$itemCategory','1','$Quantity','$itemPrice','$Ram','$Storage','$Camera','$Processor','$Description','$ShortDesc');";
+                  $sql="INSERT INTO `tbl_product` (`productName`,`brandID`,`categoryID`,`merchantID`,`quantity`,`price`,`ram`,`storage`,`camera`,`processor`,`description`,`shortDescription`,`status`)
+                  VALUES ('$productName','$Brand','$itemCategory','1','$Quantity','$itemPrice','$Ram','$Storage','$Camera','$Processor','$Description','$ShortDesc','1');";
 
                   if($conn->query($sql)){
                     echo "<center><div class='alert success'><span class='closebtn' onclick=\"this.parentElement.style.display='none';\">&times;</span>
@@ -108,12 +108,18 @@ if(!isset($_SESSION['UserData']['Username'])){
 
                 <div class="card-body">
                   <table width="100%">
+                    <td style="padding-left:20px;">Category Type: </td>
+                    <td><select name="category" class="form-control mt-2">
+                      <option value="1">Camera</option>
+                      <option value="2">Computers, Tablets & Laptops</option>
+                      <option value="3">Mobile Phone</option>
+                      <option value="4">Storage Devices</option>
+                      <option value="5">Sound & Vision</option>
+                    </select>
+                  </td>
                     <tr>
-                      <td  colspan=2 style="background-color:#353638; padding-bottom:10px;padding:20px;"><h1 style="color:#f7efc0;" align="center">Dobermann Add Item</h1></td>
-                    </tr>
-                    <tr>
-                      <td style="padding-left:20px;"> <br>Brand: </td>
-                      <td><br><select name="txtbrand">
+                      <td style="padding-left:20px;"> Brand: </td>
+                      <td><select name="txtbrand" class="form-control mt-2">
                         <option value="1">Apple</option>
                         <option value="2">samsung</option>
                         <option value="Mobile Phone">Mobile Phone</option>
@@ -123,59 +129,49 @@ if(!isset($_SESSION['UserData']['Username'])){
                     </tr>
                     <tr>
 
-                      <td style="padding-left:20px;"> <br>Product Name: </td>
-                      <td><br><input type="text" class="texto"required name="txtproductname" maxlength="30"></td>
+                      <td style="padding-left:20px;"> Product Name: </td>
+                      <td><input type="text"  class="form-control mt-2" required name="txtproductname" maxlength="30"></td>
                     </tr>
                     <tr>
-                      <td style="padding-left:20px;"> <br>Quantity: </td>
-                      <td><br><input type="number" class="texto"required name="txtquantity"></td>
+                      <td style="padding-left:20px;"> Quantity: </td>
+                      <td><input type="number" class="form-control mt-2" required name="txtquantity"></td>
                       <tr>
                         <td style="padding-left:20px;">Price: ₱ </td>
-                        <td><input type="number" class="texto" required name="txtPrice"></td>
+                        <td><input type="number" class="form-control mt-2"  required name="txtPrice"></td>
 
                       </tr>
                       <tr>
 
                         <td style="padding-left:20px;">Ram: </td>
-                        <td><input type="number" class="texto" required name="txtram"></td>
+                        <td><input type="number" class="form-control mt-2"  required name="txtram"></td>
                       </tr>
                       <tr>
                         <td style="padding-left:20px;">Storage: </td>
-                        <td><input type="text" class="texto" required name="txtstorage"></td>
+                        <td><input type="text" class="form-control mt-2"  required name="txtstorage"></td>
                       </tr>
                       <tr>
                         <td style="padding-left:20px;">Camera:  </td>
-                        <td><input type="text" class="texto" required name="txtCamera"></td>
+                        <td><input type="text" class="form-control mt-2"  required name="txtCamera"></td>
                       </tr>
-
-                      <td style="padding-left:20px; font-size:20px;"><br>Category Type: </td>
-                      <td><br><select name="category">
-                        <option value="1">Camera</option>
-                        <option value="2">Computers, Tablets & Laptops</option>
-                        <option value="3">Mobile Phone</option>
-                        <option value="4">Storage Devices</option>
-                        <option value="5">Sound & Vision</option>
-                      </select>
-                    </td>
                     <tr>
-                      <td style="padding-left:20px;"><br>Processor: </td>
-                      <td><br><input type="text" class="texto" required name="txtprocessor"></td>
+                      <td style="padding-left:20px;">Processor: </td>
+                      <td><input type="text" class="form-control mt-2"  required name="txtprocessor"></td>
                     </tr>
                     <tr>
-                      <td style="padding-left:20px;cursor:pointer;"><br>Image:<br></td>
-                      <td><br><input type="file" name="fileImage" id="fileImage" accept=".png, .jpg, .jpeg" required><br></td>
+                      <td style="padding-left:20px;cursor:pointer;">Image:</td>
+                      <td><input type="file" name="fileImage" id="fileImage" accept=".png, .jpg, .jpeg" required class="mt-2"></td>
                     </tr>
                     <tr>
-                      <td style="padding-left:20px;"><br>Description:<br></td>
-                      <td><textarea id = ""required name="txtdescription" style="height:220px;width:250px;"> </textarea></td>
+                      <td style="padding-left:20px;">Description:</td>
+                      <td><textarea  class="form-control mt-2" required name="txtdescription" style="height:220px;width:100%;"> </textarea></td>
                     </tr>
                     <td style="padding-left:20px;">Short Description:  </td>
-                    <td><textarea  id="txtshort" class ="texto"required name= "txtshort" style="height:220px;width:250px;"> </textarea></td>
+                    <td><textarea   class="form-control mt-2" class ="texto"required name= "txtshort" style="height:220px;width:100%;"> </textarea></td>
                   </tr>
 
 
-                  <tr style="margin-top:20px;background-color:#353638;">
-                    <td colspan=2 align=center><br><input class="buttones" type="submit" name="btnAddMenu" value="Add to Menu"><br><br></td>
+                  <tr>
+                    <td colspan=2 align=center><input class="mt-3 btn btn-primary float-right" type="submit" name="btnAddMenu" value="Submit"></td>
                   </tr>
                 </table>
                 </div>

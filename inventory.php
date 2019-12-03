@@ -154,32 +154,26 @@ if(!isset($_SESSION['UserData']['Username'])){
 
               $sql = "SELECT * from tbl_product;";
               $result = $conn->query($sql);
-              echo"  	<br><br><font style='color:#fffbc2; font-size:45px;'>Welcome Admin!</font><br>
-              <font style='color:#fffbc2; font-size:18px;'>Actions: </font><a href='addmenu.php'style='text-decoration:none; color:#c2dcff;'><u>Add Item</u></a>
-              <font style='color:#fffbc2; font-size:18px;'> | </font><a href='#Edit' class='smoothScroll' style='text-decoration:none; color:#c2dcff;'><u>Edit Item</u></a>
-              <font style='color:#fffbc2; font-size:18px;'> | </font><a href='vouchers.php' style='text-decoration:none; color:#c2dcff;'><u>Vouchers</u></a>
-              <font style='color:#fffbc2; font-size:18px;'> | </font>
-              <a href='viewinfo.php' style='text-decoration:none; color:#c2dcff;'><u>View Customer and Order Info.</u></a>
-              <table border=0 align=center width=\"50%\" style='box-shadow: 5px 5px 5px 5px #000; font-size:20px;background-color:rgba(255,255,255,0.8);'>
-                <br><br><br><center>
-                <tr style='padding:20px;'>
-                  <th class='td_search1' style='padding-left:5px;'>Search:</th>
-                  <td>
-                    <input type='text' name='txtSearch' placeholder='Type Here' class='textboxx'>
-                  </td>
-                  <th>By: </th>
-                  <td>
-                    <select name='cmbSearchBy' required class='td_select selecta'>
-                    <option value='name'>Item Name</option>
-                    <option value='brand'>Brand</option>
-                    <option value='category'>Category</option>
-                    </select>&nbsp;&nbsp;&nbsp;
-                  </td>
-                  <td class='td_search5'>
-                    <input type='submit' name='search' value='Search' class=' buttones' style='margin:5px'>
-                  </td>
-                </tr>
-              </table><br>
+              echo"
+							<center>
+							<div class='card' style='width:50%'>
+							<div class='card-body'>
+							<table border=0 align=center style='font-size:20px;background-color:rgba(255,255,255,0.8);'>
+							<center>
+								<tr>
+									<th class='td_search1'>Search:</th>
+									<td>
+										<input type='text' name='txtSearch' placeholder='Type Here' class='textboxx form-control'>
+									</td>
+									<td class='td_search5'>
+										<input type='submit' name='search' value='Search' class='btn btn-primary' style='margin:5px'>
+									</td>
+								</tr>
+							</table>
+							</div>
+							</div>
+							</center>
+							<br>
               ";
               ?>
               <?php
@@ -200,12 +194,8 @@ if(!isset($_SESSION['UserData']['Username'])){
                           <th scope='col'>Item Name</th>
                           <th scope='col'>Quantity</th>
                           <th scope='col'>Price</th>
-                          <th scope='col'>RAM</th>
-                          <th scope='col'>Storage</th>
-                          <th scope='col'>Camera</th>
-                          <th scope='col'>Processor</th>
-                          <th scope='col'>Description</th>
-                          <th scope='col'>Short Description</th>
+													<th scope='col'>Short Description</th>
+													<th scope='col'>Edit</th>
                           <th scope='col'>Status</th>
                         </tr>
                       </thead>
@@ -230,24 +220,12 @@ if(!isset($_SESSION['UserData']['Username'])){
                       <td>
                         ".$row['price']."
                       </td>
-                      <td>
-                        ".$currency.$row['ram']."
-                      </td>
-                      <td>
-                        ".$row['storage']."
-                      </td>
-                      <td>
-                        ".$row['camera']."
-                      </td>
-                      <td>
-                        ".$row['processor']."
-                      </td>
-                      <td>
-                        ".$row['description']."
-                      </td>
-                      <td>
-                        ".$row['shortDescription']."
-                      </td>
+											<td>
+												".$row['shortDescription']."
+											</td>
+											<td>
+												<a class='btn btn-primary' href='product2.php?p=".$row['productID']."'>Edit</a>
+											</td>
                       <td>
                         ";
                       // Mag lalagay ng property na checked pag yung status sa database ay true
@@ -273,22 +251,12 @@ if(!isset($_SESSION['UserData']['Username'])){
                   ";
                 }
                 echo "
-                <tr>
-                  <td colspan='13' style='padding-top:30px;padding-bottom:30px; background-color:#5b4a44'>
-                    <center>
-                      <input type='submit' name='delete' value='Delete Selected Item(s)' class='td_delete buttones2'>
-                    </center>
-                  </td>
-                </tr>
                 </tbody>
                 <br>
                 </table>
                 </div>
                 </div>
                 </div>
-
-
-
                 </center>
                 ";
               }

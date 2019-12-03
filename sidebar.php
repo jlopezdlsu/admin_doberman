@@ -37,11 +37,11 @@
                 Add Item
               </a>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <a href="updateitem.php" class="nav-link ">
                 Update Item
               </a>
-            </li>
+            </li> -->
           </ul>
         </div>
       </li>
