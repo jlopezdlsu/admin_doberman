@@ -13,6 +13,8 @@ if(!isset($_SESSION['UserData']['Username'])){
   <title></title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <script src="https://kit.fontawesome.com/12fc28d7cb.js"></script>
+
+	<link rel="stylesheet" href="//cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -29,10 +31,7 @@ if(!isset($_SESSION['UserData']['Username'])){
             <?php
             $currency           = '&#x20B1; '; //currency symbol
             $shipping_cost      = 50; //shipping cost
-            $conn = new mysqli($db_host, $db_username, $db_password,$db_name); //connect to MySql
-            if ($conn->connect_error) {//Output any connection error
-              die('Error : ('. $conn->connect_errno .') '. $conn->connect_error);
-            }
+
             if (isset($_POST['txtSpecs'])) {
               // Escape any html characters
               echo htmlentities($_POST['txtSpecs']);
@@ -63,7 +62,7 @@ if(!isset($_SESSION['UserData']['Username'])){
               $check = getimagesize($_FILES["fileImage"]["tmp_name"]); // Returns false if file is not image
 
               $sql="SELECT * FROM products ;";
-              $result=$conn->query($sql);
+              $result=$con->query($sql);
               if ($result->num_rows >=1) {
 
                 if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg") {
@@ -93,7 +92,7 @@ if(!isset($_SESSION['UserData']['Username'])){
                   WHERE CODE
                   = '$itemCode';";
 
-                  $conn->query($sql);
+                  $con->query($sql);
                   $editSuccess = true;
                 }
                 else {
@@ -113,7 +112,7 @@ if(!isset($_SESSION['UserData']['Username'])){
               // Update IF STATUSUPDATE has value
               //                                                                    eto naka ID lang
               $sql="update tbl_product SET status=".$_POST['statusupdate']." where productID=".$_POST['statusid']." ;";
-              $conn->query($sql);
+              $con->query($sql);
             }
             if (isset($_POST["btnEditItem"])) {
               if ($editSuccess) {
@@ -134,7 +133,7 @@ if(!isset($_SESSION['UserData']['Username'])){
                     $file_pattern = "../themes/images/products/"."$status"."*";
                     array_map( "unlink", glob( $file_pattern ) );
                     $sql = "DELETE FROM products WHERE name = '$status'";
-                    $conn->query($sql);
+                    $con->query($sql);
                   }
                 }
                 else{
@@ -152,37 +151,10 @@ if(!isset($_SESSION['UserData']['Username'])){
                 }
               }
 
-              $sql = "SELECT * from tbl_product;";
-              $result = $conn->query($sql);
-              echo"
-							<center>
-							<div class='card' style='width:50%'>
-							<div class='card-body'>
-							<table border=0 align=center style='font-size:20px;background-color:rgba(255,255,255,0.8);'>
-							<center>
-								<tr>
-									<th class='td_search1'>Search:</th>
-									<td>
-										<input type='text' name='txtSearch' placeholder='Type Here' class='textboxx form-control'>
-									</td>
-									<td class='td_search5'>
-										<input type='submit' name='search' value='Search' class='btn btn-primary' style='margin:5px'>
-									</td>
-								</tr>
-							</table>
-							</div>
-							</div>
-							</center>
-							<br>
-              ";
-              ?>
-              <?php
-              //asasasasasasassssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
-              $sql = "SELECT * FROM tbl_product INNER JOIN tbl_productimg ON tbl_product.productID=tbl_productimg.productID;";
-
-              $result = $conn->query($sql);
-              if ($result->num_rows > 0) {
-                // output data of each row
+							$merchantID = $_SESSION['UserData']['UserID'];
+              $sqlProducts = "SELECT * FROM tbl_product INNER JOIN tbl_productimg ON tbl_product.productID=tbl_productimg.productID WHERE tbl_product.merchantID = '$merchantID'";
+              $resultProducts = $con->query($sqlProducts);
+              if (mysqli_num_rows($resultProducts) > 0) {
                 echo "
                 <div class='card'>
                   <div class='card-body'>
@@ -202,7 +174,7 @@ if(!isset($_SESSION['UserData']['Username'])){
                     <tbody>
                 ";
 
-                while($row = $result->fetch_assoc()) {
+                while($row = $resultProducts->fetch_assoc()) {
                   echo "
                     <tr>
                       <td>
@@ -224,7 +196,7 @@ if(!isset($_SESSION['UserData']['Username'])){
 												".$row['shortDescription']."
 											</td>
 											<td>
-												<a class='btn btn-primary' href='product2.php?p=".$row['productID']."'>Edit</a>
+												<a class='btn btn-primary' href='edit.php?p=".$row['productID']."'>Edit</a>
 											</td>
                       <td>
                         ";
@@ -264,7 +236,7 @@ if(!isset($_SESSION['UserData']['Username'])){
                 echo "<center><div class='alert'><span class='closebtn' onclick=\"this.parentElement.style.display='none';\">&times;</span>Sorry no menu found.<br>Please do press \"Search\" button once again to view all items.
                 </div>";
               }
-              $conn->close();
+              $con->close();
               ob_end_flush();
               ?>
             </form>
@@ -276,11 +248,14 @@ if(!isset($_SESSION['UserData']['Username'])){
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+<script src="//cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function($) {
     $(".table-row").click(function() {
         window.document.location = $(this).data("href");
     });
+		    $('table').DataTable();
 });
 
 </script>

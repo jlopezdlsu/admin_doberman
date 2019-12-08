@@ -1,4 +1,7 @@
 <?php session_start(); /* Starts the session */
+include('dbcon.php');
+
+
 if(isset($_SESSION['UserData']['Username'])){
   header("location:index.php");
 }
@@ -8,14 +11,19 @@ if(isset($_SESSION['UserData']['Username'])){
 		/* Define username and associated password array */
 		$logins = array('bruce_wayne' => 'D@m1AnW@yN3');
 
+
 		/* Check and assign submitted Username and Password to new variable */
 		$Username = isset($_POST['Username']) ? $_POST['Username'] : '';
-		$Password = isset($_POST['Password']) ? $_POST['Password'] : '';
+		$Password = isset($_POST['Password']) ? md5($_POST['Password']) : '';
 
+    $query = "SELECT * FROM tbl_users WHERE username = '$Username' AND password = '$Password' AND userType = 1";
+    $result = $con->query($query);
 		/* Check Username and Password existence in defined array */
-		if (isset($logins[$Username]) && $logins[$Username] == $Password){
+		if (mysqli_num_rows($result) > 0){
+      $row = $result->fetch_assoc();
 			/* Success: Set session variables and redirect to Protected page  */
-			$_SESSION['UserData']['Username']=$logins[$Username];
+			$_SESSION['UserData']['Username']= $Username;
+      $_SESSION['UserData']['UserID'] =$row['userID'];
 			header("location:index.php");
 			exit;
 		} else {
