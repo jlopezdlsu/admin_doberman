@@ -1,0 +1,8 @@
+{
+    "name": "regina/admin_doberman",
+    "description": "sample",
+    "minimum-stability": "dev",
+    "require": {
+        "nexmo/client": "dev-master"
+    }
+}

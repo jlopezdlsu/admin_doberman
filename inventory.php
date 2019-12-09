@@ -181,7 +181,7 @@ if(!isset($_SESSION['UserData']['Username'])){
                         ".$row['productID']."
                       </td>
                       <td style='padding:5px'>
-                        <img src='".$row['imgSource']."' length='80' width='80' alt='".$row['productID']."'><br><br>
+                        <img src='image/".$row['imgName']."' length='80' width='80' alt='".$row['productID']."'><br><br>
                       </td>
                       <td>
                         ".$row['productName']."
