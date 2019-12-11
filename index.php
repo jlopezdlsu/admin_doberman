@@ -1,9 +1,26 @@
 <?php session_start(); /* Starts the session */
+ include('dbcon.php');
 
 if(!isset($_SESSION['UserData']['Username'])){
 	header("location:login.php");
 	exit;
 }
+
+
+$merchantID = $_SESSION['UserData']['UserID'];
+
+$query = "SELECT SUM(tbl_payment.total) as total FROM tbl_order INNER JOIN tbl_payment ON tbl_payment.paymentID = tbl_order.paymentID LEFT JOIN tbl_product ON tbl_order.productID = tbl_product.productID WHERE tbl_product.merchantID = '$merchantID' AND  MONTH(tbl_payment.date_created) = MONTH(CURRENT_DATE())
+AND YEAR(tbl_payment.date_created) = YEAR(CURRENT_DATE())";
+$results = $con->query($query);
+$total = mysqli_fetch_assoc($results);
+
+$query2 = "SELECT COUNT(tbl_product.merchantID) as products FROM tbl_product WHERE tbl_product.merchantID = '$merchantID'";
+$results2 = $con->query($query2);
+$product = mysqli_fetch_assoc($results2);
+
+$query3 = "SELECT SUM(tbl_payment.total) as total FROM tbl_order INNER JOIN tbl_payment ON tbl_payment.paymentID = tbl_order.paymentID LEFT JOIN tbl_product ON tbl_order.productID = tbl_product.productID";
+$results3 = $con->query($query3);
+$monthlyTotal = mysqli_fetch_assoc($results3);
 ?>
 
 <!DOCTYPE html>
@@ -51,12 +68,12 @@ if(!isset($_SESSION['UserData']['Username'])){
 
                     <!-- Title -->
                     <h6 class="card-title text-uppercase text-cebuana-red font-weight-bold mb-2">
-                      Budget
+                      Income this Month
                     </h6>
 
                     <!-- Heading -->
                     <span class="h2 text-white mb-0">
-                      ₱ 24,500
+                      ₱ <?php echo number_format($monthlyTotal['total'],2) ?>
                     </span>
 
                     <!-- Badge -->
@@ -87,12 +104,13 @@ if(!isset($_SESSION['UserData']['Username'])){
 
                     <!-- Title -->
                     <h6 class="card-title text-uppercase text-cebuana-red font-weight-bold mb-2">
-                      Applied
+											Number of Products
+
                     </h6>
 
                     <!-- Heading -->
                     <span class="h2 text-white mb-0">
-                      763.5
+											<?php echo number_format($product['products']) ?>
                     </span>
 
                   </div>
@@ -118,7 +136,7 @@ if(!isset($_SESSION['UserData']['Username'])){
 
                     <!-- Title -->
                     <h6 class="card-title text-uppercase text-cebuana-red font-weight-bold mb-2">
-                      Amount Disbursed
+                      Number of Products
                     </h6>
 
                     <div class="row align-items-center no-gutters">
@@ -126,7 +144,7 @@ if(!isset($_SESSION['UserData']['Username'])){
 
                         <!-- Heading -->
                         <span class="h2 text-white mr-2 mb-0">
-                          84.5%
+                          <?php echo number_format($product['products']) ?>
                         </span>
 
                       </div>
@@ -163,7 +181,7 @@ if(!isset($_SESSION['UserData']['Username'])){
 
                     <!-- Title -->
                     <h6 class="card-title text-uppercase text-cebuana-red font-weight-bold mb-2">
-                      Amount Collected
+                      Total Revenue
                     </h6>
 
                     <div class="row align-items-center no-gutters">
@@ -171,7 +189,7 @@ if(!isset($_SESSION['UserData']['Username'])){
 
                         <!-- Heading -->
                         <span class="h2 text-white mr-2 mb-0">
-                          84.5%
+                        ₱  <?php echo number_format($total['total'],2) ?>
                         </span>
 
                       </div>
