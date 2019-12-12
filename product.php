@@ -74,10 +74,42 @@ jQuery(document).ready(function($) {
 </head>
 
 <body>
-	<?php include('header.php') ?>
+	<?php
+	if(isset($_GET['s'])){
+		$query = $connect->prepare("SELECT product.productID,product.productName, product.quantity, product.price,product.description, product.shortDescription, category.categoryID, product.categoryID, category.categoryName  FROM tbl_accessories product INNER JOIN tbl_category category ON category.categoryID = product.categoryID WHERE productID = :product_id");
+	}else{
+		$query = $connect->prepare("SELECT product.productID,product.productName, product.quantity, product.price, product.ram, product.storage, product.camera, product.processor, product.description, product.shortDescription, category.categoryID, product.categoryID, category.categoryName  FROM tbl_product product INNER JOIN tbl_category category ON category.categoryID = product.categoryID WHERE productID = :product_id");
+	}
+	$query->execute(['product_id' => $_GET['p']]); ?>
+	<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 border-bottom box-shadow fixed-top" style="background:#2B2D42;">
+	  <div class="container">
+	    <div class="row">
+	      <div class="col-lg-12">
+	        <a href="edit.php?p=<?php echo isset($_GET['s']) ? $_GET['p'] . "&s=true":  $_GET['p']?> " class=" float-left"><i class="fa fa-arrow-left" style="color:white;"></i></a>
+	        <center>
+	          <h2 style="color: #fff;text-align:center">Preview</h2>
+	        </center>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 bg-white border-bottom box-shadow fixed-top" style="margin-top:75px;">
+	  <div class="container">
+	    <div class="row">
+	      <h3 class="my-0 mr-md-auto font-weight-normal">Doberman</h3>
+	      <nav class="my-2 my-md-0 mr-md-3">
+	        <a class="p-2 text-dark" href="#">Features</a>
+	        <a class="p-2 text-dark" href="#">Enterprise</a>
+	        <a class="p-2 text-dark" href="#">Category</a>
+	        <a class="p-2 text-dark" href="#">Contact Us</a>
+	      </nav>
+	    </div>
+	  </div>
+	</div>
+
 
 	<!-- SECTION -->
-	<div class="section " style="margin-top:100px;">
+	<div class="section " style="margin-top:175px;">
 		<!-- container -->
 		<div class="container">
 			<!-- row -->
@@ -85,23 +117,22 @@ jQuery(document).ready(function($) {
 				<!-- Product main img -->
 
 				<?php
-				$query = $connect->prepare("SELECT product.productID,product.productName, product.quantity, product.price, product.ram, product.storage, product.camera, product.processor, product.description, product.shortDescription, category.categoryID, product.categoryID, category.categoryName  FROM tbl_product product INNER JOIN tbl_category category ON category.categoryID = product.categoryID WHERE productID = :product_id");
-				$query->execute(['product_id' => $_GET['p']]);
-				while ($row = $query->fetch()){
 
+				while ($row = $query->fetch()){
+					$image = isset($_GET['s']) ? getImage2($row['productID'],$connect) : getImage($row['productID'],$connect);
 					// do stuff here
 					echo '
 					<div class="col-md-5 col-md-push-2">
 					<div id="product-main-img">
 					<div class="product-preview">
-					<img src="image/'.getImage($row['productID'],$connect).'" alt="">
+					<img src="image/'.$image.'" alt="">
 					</div>
 					</div>
 					</div>
 					<div class="col-md-2  col-md-pull-5">
 					<div id="product-imgs">
 					<div class="product-preview">
-					<img src="image/'.getImage($row['productID'],$connect).'" alt="">
+					<img src="image/'.$image.'" alt="">
 					</div>
 					</div>
 					</div>
@@ -124,30 +155,45 @@ jQuery(document).ready(function($) {
 					<a class="review-link" href="#review-form">10 Review(s) | Add your review</a>
 					</div>
 					<div>
-					<h3 class="product-price">$'.$row['price'].'</h3>
+					<h3 class="product-price">PHP '.$row['price'].'</h3>
 					<span class="product-available">In Stock</span>
 					</div>
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+					<ul class="product-links">
+						<li><b>Category:</b></li>
+						<li><a href="#">'.$row['categoryName'].'</a></li>
+						</ul>
+						<ul class="product-links">';
+					if(!isset($_GET['s'])){
+						echo '	<li><b>RAM:</b></li>
+							<li><a href="#">'.$row['ram'].'</a></li>
+							</ul>
+							<ul class="product-links">
+							<li><b>Storage:</b></li>
+							<li><a href="#">'.$row['storage'].'</a></li>
+							</ul>
+							<ul class="product-links">
+							<li><b>Processor:</b></li>
+							<li><a href="#">'.$row['processor'].'</a></li>
+							</ul>
+							<ul class="product-links">
+							<li><b>Camera:</b></li>
+							<li><a href="#">'.$row['camera'].'</a></li>
+						</ul>';
+					}
+					echo '
+					<br>
+					<p>'.$row['shortDescription'].'</p>
 
-
-					<form method="post" action="checkout.php?p='.$row['productID'].'#!">
-						<div class="add-to-cart">
+						<div class="add-to-cart" style="width:30% ;float:left">
 						<div class="btn-group" style="margin-left: 25px; margin-top: 15px">
-						<button class="add-to-cart-btn pc_data" id="'.$row['productID'].'" data-dataid='.$row['productID'].' ><i class="fa fa-shopping-cart"></i> Buy</button>
+						<button class="add-to-cart-btn pc_data" type="submit" id="'.$row['productID'].'" data-dataid='.$row['productID'].' ><i class="fa fa-money"></i> Buy</button>
 						</div>
 						</div>
-					</form>
-					<form method="post" id="add-to-cart-form" action="addtocart.php?p='.$row['productID'].'#!">
-						<div class="add-to-cart">
+						<div class="add-to-cart" style="width:70%;float:left">
 						<div class="btn-group" style="margin-left: 25px; margin-top: 15px">
 						<button class="add-to-cart-btn pc_data" type="submit" id="'.$row['productID'].'" data-dataid='.$row['productID'].' ><i class="fa fa-shopping-cart"></i> Add to Cart</button>
 						</div>
 						</div>
-					</form>
-					<ul class="product-links">
-					<li>Category:</li>
-					<li><a href="#">'.$row['categoryName'].'</a></li>
-					</ul>
 					<ul class="product-links">
 					<li>Share:</li>
 					<li><a href="#"><i class="fa fa-facebook"></i></a></li>
@@ -166,10 +212,9 @@ jQuery(document).ready(function($) {
 					<div class="col-md-12">
 					<div id="product-tab">
 					<!-- product tab nav -->
-					<ul class="tab-nav">
+					<ul class="nav tab-nav" style="display:block">
 					<li class="active"><a data-toggle="tab" href="#tab1" role="tab">Description</a></li>
-					<li><a data-toggle="tab" href="#tab2" role="tab">Details</a></li>
-					<li><a data-toggle="tab" href="#tab3" role="tab">Reviews (3)</a></li>
+					<li><a data-toggle="tab" href="#tab2" role="tab">Reviews</a></li>
 					</ul>
 					<!-- /product tab nav -->
 					<!-- product tab content -->
@@ -178,22 +223,17 @@ jQuery(document).ready(function($) {
 					<div class="tab-pane active" id="tab1" role="tabpanel">
 					<div class="row">
 					<div class="col-md-12">
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+					<p>
+					'.$row['description'].'
+					</p>
 					</div>
 					</div>
 					</div>
 					<!-- /tab1  -->
-					<!-- tab2  -->
-					<div class="tab-pane fade in" id="tab2"  role="tabpanel">
-					<div class="row">
-					<div class="col-md-12">
-					<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-					</div>
-					</div>
-					</div>
-					<!-- /tab2  -->
+
 					<!-- tab3  -->
-					<div class="tab-pane fade in" id="tab3"  role="tabpanel">
+					<div class="tab-pane fade in" id="tab2"  role="tabpanel">
 					<div class="row">
 					<!-- Rating -->
 					<div class="col-md-3">
@@ -391,14 +431,14 @@ jQuery(document).ready(function($) {
 					<div class='product-img'>
 					<img src='image/". getImage($row['productID'],$connect) ."' style='max-height: 170px;' alt='' class='img-responsive'>
 					<div class='product-label'>
-					<span class='sale'>-30%</span>
+
 					<span class='new'>NEW</span>
 					</div>
 					</div></a>
 					<div class='product-body'>
 					<p class='product-category'>$pro_cat</p>
 					<h3 class='product-name header-cart-item-name'><a href='product.php?p=$pro_id'>$pro_title</a></h3>
-					<h4 class='product-price header-cart-item-info'>$pro_price<del class='product-old-price'>$990.00</del></h4>
+					<h4 class='product-price header-cart-item-info'>PHP $pro_price</h4>
 					<div class='product-rating'>
 					<i class='fa fa-star'></i>
 					<i class='fa fa-star'></i>
@@ -406,11 +446,7 @@ jQuery(document).ready(function($) {
 					<i class='fa fa-star'></i>
 					<i class='fa fa-star'></i>
 					</div>
-					<div class='product-btns'>
-					<button class='add-to-wishlist'><i class='fa fa-heart-o'></i><span class='tooltipp'>add to wishlist</span></button>
-					<button class='add-to-compare'><i class='fa fa-exchange'></i><span class='tooltipp'>add to compare</span></button>
-					<button class='quick-view'><i class='fa fa-eye'></i><span class='tooltipp'>quick view</span></button>
-					</div>
+
 					</div>
 					<div class='add-to-cart'>
 					<button pid='$pro_id' id='product' class='add-to-cart-btn block2-btn-towishlist' href='#'><i class='fa fa-shopping-cart'></i> add to cart</button>

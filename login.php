@@ -31,16 +31,16 @@ if(isset($_POST['Submit'])){
     $codeQuery = "UPDATE tbl_users SET loginCode = '$code' WHERE userID = '$id'";
     if($con->query($codeQuery)){
 
-      if($phoneNumber){
-        $message = $client->message()->send([
-          'to' => $phoneNumber,
-          'from' => 'Doberman',
-          'text' => 'Your one-time password is '.$code
-        ]);
-        header("location:authenticate.php?s=".$id);
-      }else{
-        echo "Your mobile number is not registered with our system. Please contact the System Administrator";
-      }
+      // if($phoneNumber){
+      //   $message = $client->message()->send([
+      //     'to' => $phoneNumber,
+      //     'from' => 'Doberman',
+      //     'text' => 'Your one-time password is '.$code
+      //   ]);
+      header("location:authenticate.php?s=".$id);
+      // }else{
+      //   echo "Your mobile number is not registered with our system. Please contact the System Administrator";
+      // }
 
     }else{
       echo mysqli_error($con);

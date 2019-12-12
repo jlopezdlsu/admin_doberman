@@ -154,6 +154,9 @@ if(!isset($_SESSION['UserData']['Username'])){
 							$merchantID = $_SESSION['UserData']['UserID'];
               $sqlProducts = "SELECT * FROM tbl_product INNER JOIN tbl_productimg ON tbl_product.productID=tbl_productimg.productID WHERE tbl_product.merchantID = '$merchantID'";
               $resultProducts = $con->query($sqlProducts);
+
+							$sqlAccsrs = "SELECT * FROM tbl_accessories INNER JOIN tbl_accessoriesimg ON tbl_accessories.productID=tbl_accessoriesimg.productID WHERE tbl_accessories.merchantID = '$merchantID'";
+							$resultAccsrs= $con->query($sqlAccsrs);
               if (mysqli_num_rows($resultProducts) > 0) {
                 echo "
                 <div class='card'>
@@ -197,6 +200,55 @@ if(!isset($_SESSION['UserData']['Username'])){
 											</td>
 											<td>
 												<a class='btn btn-primary' href='edit.php?p=".$row['productID']."'>Edit</a>
+											</td>
+                      <td>
+                        ";
+                      // Mag lalagay ng property na checked pag yung status sa database ay true
+                      if($row['status']){
+                        $xString = 'checked';
+                      }
+                      else {
+                        $xString = '';
+                      }
+                      //Gumagawa ng function kada checkbox para mag update ng status
+                      echo "
+                      <center><input type='checkbox' id='chk".$row['productID']."' onclick='myFunction(".$row['productID'].")' ".$xString."></center>
+                      <script language='javascript'>
+                      function myFunction(id) {
+                        var ischeck=$('#chk'+ id).is(':checked',true);                                            //  naka product id to
+                        $('#viewAccounts').append('<input type=\"hidden\" id=\"statusid\" name=\"statusid\" value=' + id + '>');
+                        $('#viewAccounts').append('<input type=\"hidden\" id=\"statusupdate\" name=\"statusupdate\" value=' + ischeck + '>');
+                        $('#viewAccounts').submit();
+                      }
+                      </script>
+                    </td>
+                  </tr>
+                  ";
+                }
+
+								while($row = $resultAccsrs->fetch_assoc()) {
+                  echo "
+                    <tr>
+                      <td>
+                        ".$row['productID']."
+                      </td>
+                      <td style='padding:5px'>
+                        <img src='image/".$row['imgName']."' length='80' width='80' alt='".$row['productID']."'><br><br>
+                      </td>
+                      <td>
+                        ".$row['productName']."
+                      </td>
+                      <td>
+                        ".$row['quantity']."
+                      </td>
+                      <td>
+                        ".$row['price']."
+                      </td>
+											<td>
+												".$row['shortDescription']."
+											</td>
+											<td>
+												<a class='btn btn-primary' href='edit.php?p=".$row['productID']."&s=true'>Edit</a>
 											</td>
                       <td>
                         ";

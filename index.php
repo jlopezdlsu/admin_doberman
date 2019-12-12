@@ -1,9 +1,9 @@
 <?php session_start(); /* Starts the session */
- include('dbcon.php');
+include('dbcon.php');
 
 if(!isset($_SESSION['UserData']['Username'])){
-	header("location:login.php");
-	exit;
+  header("location:login.php");
+  exit;
 }
 
 
@@ -21,6 +21,25 @@ $product = mysqli_fetch_assoc($results2);
 $query3 = "SELECT SUM(tbl_payment.total) as total FROM tbl_order INNER JOIN tbl_payment ON tbl_payment.paymentID = tbl_order.paymentID LEFT JOIN tbl_product ON tbl_order.productID = tbl_product.productID";
 $results3 = $con->query($query3);
 $monthlyTotal = mysqli_fetch_assoc($results3);
+
+
+//SALES PER MONTH
+$query4 = "SELECT DATE_FORMAT(tbl_payment.date_created, '%b') AS Month, SUM(tbl_payment.total) as total FROM tbl_order INNER JOIN tbl_payment ON tbl_payment.paymentID = tbl_order.paymentID LEFT JOIN tbl_product ON tbl_order.productID = tbl_product.productID WHERE tbl_product.merchantID = '$merchantID' GROUP BY dATE_FORMAT(tbl_payment.date_created, '%m-%Y')";
+$results4 = $con->query($query4);
+
+//TOP Category
+
+$query6 = "SELECT tbl_category.categoryName, SUM(tbl_payment.total) as total FROM tbl_order INNER JOIN tbl_payment ON tbl_payment.paymentID = tbl_order.paymentID LEFT JOIN tbl_product ON tbl_order.productID = tbl_product.productID LEFT JOIN tbl_category ON tbl_product.categoryID = tbl_category.categoryID WHERE tbl_product.merchantID = '$merchantID' GROUP BY tbl_product.categoryID";
+$results6 = $con->query($query6);
+
+
+
+//TOP PRODUCTS
+
+$query5 = "SELECT tbl_product.productName,SUM(tbl_order.quantity) as total FROM tbl_order INNER JOIN tbl_payment ON tbl_payment.paymentID = tbl_order.paymentID LEFT JOIN tbl_product ON tbl_order.productID = tbl_product.productID LEFT JOIN tbl_category ON tbl_product.categoryID = tbl_category.categoryID WHERE tbl_product.merchantID = '$merchantID' GROUP BY tbl_order.productID";
+$results5 = $con->query($query5);
+//  $topProducts = mysqli_fetch_assoc($results5);
+
 ?>
 
 <!DOCTYPE html>
@@ -52,7 +71,7 @@ $monthlyTotal = mysqli_fetch_assoc($results3);
 <body>
   <div class="container-fluid">
     <div class="row">
-    <?php @include('sidebar.php') ?>
+      <?php @include('sidebar.php') ?>
       <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
           <h1 class="h2 font-weight-bold">Dashboard</h1>
@@ -76,10 +95,7 @@ $monthlyTotal = mysqli_fetch_assoc($results3);
                       ₱ <?php echo number_format($monthlyTotal['total'],2) ?>
                     </span>
 
-                    <!-- Badge -->
-                    <span class="badge mt-n1">
-                      +3.5%
-                    </span>
+
 
                   </div>
                   <div class="col-auto">
@@ -104,13 +120,13 @@ $monthlyTotal = mysqli_fetch_assoc($results3);
 
                     <!-- Title -->
                     <h6 class="card-title text-uppercase text-cebuana-red font-weight-bold mb-2">
-											Number of Products
+                      Number of Products
 
                     </h6>
 
                     <!-- Heading -->
                     <span class="h2 text-white mb-0">
-											<?php echo number_format($product['products']) ?>
+                      <?php echo number_format($product['products']) ?>
                     </span>
 
                   </div>
@@ -189,7 +205,7 @@ $monthlyTotal = mysqli_fetch_assoc($results3);
 
                         <!-- Heading -->
                         <span class="h2 text-white mr-2 mb-0">
-                        ₱  <?php echo number_format($total['total'],2) ?>
+                          ₱  <?php echo number_format($total['total'],2) ?>
                         </span>
 
                       </div>
@@ -210,97 +226,33 @@ $monthlyTotal = mysqli_fetch_assoc($results3);
           </div>
         </div>
         <div class="row">
-          <div class="col-md-8">
+          <div class="col-md-12">
             <div class="card">
               <div class="card-body">
-                <canvas class="my-4 w-100" id="myChart" width="100%" height="45"></canvas>
+                <div id="monthlySales" ></div>
+
               </div>
             </div>
           </div>
+        </div>
+        <div class="row">
           <div class="col-md-4">
             <div class="card">
               <div class="card-body">
-                <canvas class="my-4 w-100" id="myChart2" width="100%" height="97.5"></canvas>
+                <div id="topCategory" ></div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-8">
             <div class="card">
               <div class="card-body">
-                <canvas class="my-4 w-100" id="myChart3" width="100%"></canvas>
+                <div id="topProducts" ></div>
+
               </div>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="card">
-              <div class="card-body">
-                <canvas class="my-4 w-100" id="myChart4" width="100%" height="112"></canvas>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="card">
-              <div class="card-body">
-                <canvas class="my-4 w-100" id="myChart5" width="100%" height="112"></canvas>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="card">
-              <h5 class="card-header card-cebuana">Section Title</h5>
-              <div class="card-body">
-                <div class="table-responsive">
-                  <table class="table">
-                    <thead>
-                      <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">First</th>
-                        <th scope="col">Last</th>
-                        <th scope="col">Handle</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <th scope="row">1</th>
-                        <td>Mark</td>
-                        <td>Otto</td>
-                        <td>@mdo</td>
-                      </tr>
-                      <tr>
-                        <th scope="row">2</th>
-                        <td>Jacob</td>
-                        <td>Thornton</td>
-                        <td>@fat</td>
-                      </tr>
-                      <tr>
-                        <th scope="row">3</th>
-                        <td>Larry</td>
-                        <td>the Bird</td>
-                        <td>@twitter</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="card card-cebuana">
-              <h5 class="card-header">Featured</h5>
-              <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
-                <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
-              </div>
-            </div>
-          </div>
-        </div>
+
+<br><br>
       </main>
     </div>
   </div>
@@ -309,13 +261,73 @@ $monthlyTotal = mysqli_fetch_assoc($results3);
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
 <script type="text/javascript">
 $(document).ready(function($) {
-    $(".table-row").click(function() {
-        window.document.location = $(this).data("href");
-    });
-});
+  $(".table-row").click(function() {
+    window.document.location = $(this).data("href");
+  });
 
-</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
-<script src="assets/js/dashboard.js" charset="utf-8"></script>
+
+
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  // Draw the chart and set the chart values
+  function drawChart() {
+    //TOP Category
+    var data = google.visualization.arrayToDataTable([
+      ['Catgory', 'Revenue'],
+      <?php
+      while($row = mysqli_fetch_assoc($results6)) {
+        // foreach ($topCategory as $category) {
+        echo "['" . $row['categoryName'] . "'," . $row['total']  . "],";         }
+        ?>
+      ]);
+
+      // Optional; add a title and set the width and height of the chart
+      var options = {'title':'Top Categories'};
+      // Display the chart inside the <div> element with id="piechart"
+      var chart = new google.visualization.PieChart(document.getElementById('topCategory'));
+      chart.draw(data, options);
+
+      //TOP Products
+      var data2 = google.visualization.arrayToDataTable([
+        ['Product', 'Sold Items'],
+        <?php
+        while($row = mysqli_fetch_assoc($results5)) {
+          // foreach ($topCategory as $category) {
+          echo "['" . $row['productName'] . "'," . $row['total']  . "],";         }
+          ?>
+        ]);
+
+        // Optional; add a title and set the width and height of the chart
+        var options2 = {'title':'Top Products'};
+        // Display the chart inside the <div> element with id="piechart"
+        var chart2 = new google.visualization.ColumnChart(document.getElementById('topProducts'));
+        chart2.draw(data2, options2);
+
+        //SALES PER MONTH
+        var data3 = google.visualization.arrayToDataTable([
+          ['Month', 'Revenue'],
+          <?php
+          while($row = mysqli_fetch_assoc($results4)) {
+            // foreach ($topCategory as $category) {
+            echo "['" . $row['Month'] . "'," . $row['total']  . "],";         }
+            ?>
+          ]);
+
+          // Optional; add a title and set the width and height of the chart
+          var options3 = {'title':'Monthly Sales'};
+          // Display the chart inside the <div> element with id="piechart"
+          var chart3 = new google.visualization.LineChart(document.getElementById('monthlySales'));
+          chart3.draw(data3, options3);
+      }
+
+
+    });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script src="assets/js/dashboard.js" charset="utf-8"></script>

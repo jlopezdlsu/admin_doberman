@@ -4,7 +4,6 @@ if(!isset($_SESSION['UserData']['Username'])){
 	header("location:login.php");
 	exit;
 }
-
 //include "header.php";
 include ('conn.php');
 include ('fetch_data.php');
@@ -14,22 +13,38 @@ if(isset($_POST['edit_submit'])){
 	$price = isset($_POST['price']) ? $_POST['price'] : '';
 	$shortDescription = isset($_POST['shortDescription']) ? $_POST['shortDescription'] : '';
 	$description = isset($_POST['description']) ? $_POST['description'] : '';
+	$ram = isset($_POST['ram']) ? $_POST['ram'] : '';
+	$storage = isset($_POST['storage']) ? $_POST['storage'] : '';
+	$camera = isset($_POST['camera']) ? $_POST['camera'] : '';
+	$processor = isset($_POST['processor']) ? $_POST['processor'] : '';
 
-	$query = $connect->prepare("UPDATE tbl_product SET productName = :productName, price = :price, description = :description, shortDescription = :shortDescription WHERE productID = :product_id");
-	$query->execute(['productName'=>$productName,'price'=>$price,'description'=>$description,'shortDescription'=>$shortDescription,'product_id' => $_GET['p']]);
+	try{
 
-	if($query){
-		echo 'yey';
+		$connect->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+		if(isset($_GET['s'])){
+			$query = $connect->prepare("UPDATE tbl_accessories SET productName = :productName, price = :price, description = :description, shortDescription = :shortDescription WHERE productID = :product_id");
+			$query->execute(['productName'=>$productName,'price'=>$price,'description'=>$description,'shortDescription'=>$shortDescription,'product_id' => $_GET['p']]);
+		}else {
+			$query = $connect->prepare("UPDATE tbl_product SET productName = :productName, price = :price, description = :description, shortDescription = :shortDescription , processor = :processor, camera = :camera, storage = :storage, ram = :ram WHERE productID = :product_id");
+			$query->execute(['productName'=>$productName,'price'=>$price,'description'=>$description,'shortDescription'=>$shortDescription,'processor'=>$processor,'camera'=>$camera,'storage'=>$storage,'ram'=>$ram,'product_id' => $_GET['p']]);
+		}
+
+	}catch(PDOException $e){
+		echo "<br>" . $e->getMessage();
+
 	}
 
-	if(isset($_FILES['fileImage'])) {
+
+	if(isset($_FILES['fileImage']) && !empty($_FILES["fileImage"]['name'])) {
 
 		$target_dir = "image/";
+		$uniq = uniqid();
 		$target_file = $target_dir . basename($_FILES["fileImage"]["name"]);
 		$imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
 		$imageSrc = "image/".$productName.".".$imageFileType; // Image src for database
-		$fileName = $target_dir.$productName.".".$imageFileType;
-		$name = $productName.".".$imageFileType;
+		$name = $productName."-".$uniq.".".$imageFileType;
+		$fileName = $target_dir.$name;
 		$check = getimagesize($_FILES["fileImage"]["tmp_name"]); // Returns false if file is not image
 
 
@@ -41,12 +56,14 @@ if(isset($_POST['edit_submit'])){
 		else {
 			if (file_exists("$fileName")) unlink("$fileName");
 			if (move_uploaded_file($_FILES["fileImage"]["tmp_name"], $fileName)) {
-				$query2 = $connect->prepare("UPDATE tbl_productimg SET imgName = :imgName, imgSource = :imgSource WHERE productID = :product_id");
-				$query2->execute(['imgName'=>$name,'imgSource'=>$name,'product_id' => $_GET['p']]);
 
-				if($query2){
-					echo 'imageUploaded';
-				}
+			if(isset($_GET['s'])){
+				$query2 = $connect->prepare("UPDATE tbl_accessoriesimg SET imgName = :imgName, imgSource = :imgSource WHERE productID = :product_id");
+			}else{
+				$query2 = $connect->prepare("UPDATE tbl_productimg SET imgName = :imgName, imgSource = :imgSource WHERE productID = :product_id");
+			}
+			$query2->execute(['imgName'=>$name,'imgSource'=>$name,'product_id' => $_GET['p']]);
+
 			}
 			else {
 				echo "<center><div class='alert warning'><span class='closebtn' onclick=\"this.parentElement.style.display='none';\">&times;</span>
@@ -94,12 +111,20 @@ if(isset($_POST['edit_submit'])){
 					<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
 						<h1 class="h2 font-weight-bold">Edit Product</h1>
 					</div>
+					<form method="post" name="edit_form" enctype="multipart/form-data">
+
 					<div class="col-lg-12">
 						<div class="row">
 							<!-- Product main img -->
 
 							<?php
-							$query = $connect->prepare("SELECT product.productID,product.productName, product.quantity, product.price, product.ram, product.storage, product.camera, product.processor, product.description, product.shortDescription, category.categoryID, product.categoryID, category.categoryName  FROM tbl_product product INNER JOIN tbl_category category ON category.categoryID = product.categoryID WHERE productID = :product_id");
+							$query = null;
+							if(isset($_GET['s'])){
+								$query = $connect->prepare("SELECT product.productID,product.productName, product.quantity, product.price, product.description, product.shortDescription, category.categoryID, product.categoryID, category.categoryName  FROM tbl_accessories product INNER JOIN tbl_category category ON category.categoryID = product.categoryID WHERE productID = :product_id");
+							}else{
+								$query = $connect->prepare("SELECT product.productID,product.productName, product.quantity, product.price, product.ram, product.storage, product.camera, product.processor, product.description, product.shortDescription, category.categoryID, product.categoryID, category.categoryName  FROM tbl_product product INNER JOIN tbl_category category ON category.categoryID = product.categoryID WHERE productID = :product_id");
+
+							}
 							$query->execute(['product_id' => $_GET['p']]);
 							while ($row = $query->fetch()){
 
@@ -108,14 +133,14 @@ if(isset($_POST['edit_submit'])){
 								<div class="col-md-5 col-md-push-2">
 								<div id="product-main-img">
 								<div class="product-preview">
-								<img src="image/'.getImage($row['productID'],$connect).'" alt="">
+								<img src="image/'.getImage2($row['productID'],$connect).'" alt="">
 								</div>
 								</div>
 								</div>
 								<div class="col-md-2  col-md-pull-5">
 								<div id="product-imgs">
 								<div class="product-preview">
-								<img src="image/'.getImage($row['productID'],$connect).'" alt="">
+								<img src="image/'.getImage2($row['productID'],$connect).'" alt="">
 								</div>
 								</div>
 
@@ -126,21 +151,50 @@ if(isset($_POST['edit_submit'])){
 								<!-- FlexSlider -->
 								<?php
 								echo '
-								<form method="post" name="edit_form" enctype="multipart/form-data">
 								<div class="col-md-5">
 								<div class="product-details">
 
 								<input type="text" class="product-name form-control" name="productName" value="'.$row['productName'].'" style="width:100%;">
 								<div>
-								<input type="text" class="product-price form-control" name="price" value="$'.$row['price'].'" style="width:100%;">
+								<input type="text" class="product-price form-control" name="price" value="'.$row['price'].'" style="width:100%;">
 
 								</div>
+									<ul class="product-links">
+									<li><b>Category:</b></li>
+									<li>
+									'.$row['categoryName'].'
+									</li>
+									</ul>';
+								if(!isset($_GET['s'])){
+									echo '<ul class="product-links">
+									<li><b>RAM:</b></li>
+									<li>
+									<input type="text" class="form-control" name="ram" value="'.$row['ram'].'" style="width:100%;">
+									</li>
+									</ul>
+									<ul class="product-links">
+									<li><b>Storage:</b></li>
+									<li>
+									<input type="text" class="form-control" name="storage" value="'.$row['storage'].'" style="width:100%;">
+									</li>
+									</ul>
+									<ul class="product-links">
+									<li><b>Processor:</b></li>
+									<li>
+									<input type="text" class="form-control" name="processor" value="'.$row['processor'].'" style="width:100%;">
+									</li>
+									</ul>
+									<ul class="product-links">
+									<li><b>Camera:</b></li>
+									<li>
+									<input type="text" class="form-control" name="camera" value="'.$row['camera'].'" style="width:100%;">
+
+									</li>
+								</ul>';
+								}
+								echo '<br>
 								<textarea class="form-control" style="width:100%;" name="shortDescription" rows="8">'.$row['shortDescription'].'</textarea>
 
-								<ul class="product-links">
-								<li>Category:</li>
-								<li><a href="#">'.$row['categoryName'].'</a></li>
-								</ul>
 								</div>
 								</div>
 								<br>
@@ -159,7 +213,6 @@ if(isset($_POST['edit_submit'])){
 								<!-- product tab nav -->
 								<ul class="tab-nav">
 								<li class="active"><a data-toggle="tab" href="#tab1" role="tab">Description</a></li>
-								<li><a data-toggle="tab" href="#tab2" role="tab">Details</a></li>
 								</ul>
 								<!-- /product tab nav -->
 								<!-- product tab content -->
@@ -173,24 +226,21 @@ if(isset($_POST['edit_submit'])){
 								</div>
 								</div>
 								<!-- /tab1  -->
-								<!-- tab2  -->
-								<div class="tab-pane fade in" id="tab2"  role="tabpanel">
-								<div class="row">
-								<div class="col-md-12">
-								<textarea class="form-control" style="width:100%;"  rows="8">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-								</textarea>
-								</div>
-								</div>
-								</div>
-								<!-- /tab2  -->
+
 
 								</div>
 								<!-- /product tab content  -->
 								</div>
 								</div>
 								<!-- /product tab -->
-								<br>
-								<button type="submit" name="edit_submit" class="btn btn-primary">Submit</button>
+								<br>';
+								if(isset($_GET['s'])){
+									echo '<a href="product.php?s=true&p='.$row['productID'].'" class="btn btn-secondary  mt-3 mb-3 mr-2">Preview</a>';
+								}else{
+									echo '<a href="product.php?p='.$row['productID'].'" class="btn btn-secondary  mt-3 mb-3 mr-2">Preview</a>';
+								}
+								echo '
+								<button type="submit" name="edit_submit" class="btn btn-primary mt-3 mb-3">Submit</button>
 								<br><br>
 								</form>
 								</div>
@@ -216,6 +266,7 @@ if(isset($_POST['edit_submit'])){
 
 						</div>
 					</div>
+
 				</main>
 			</div>
 		</div>

@@ -41,23 +41,26 @@ if(!isset($_SESSION['UserData']['Username'])){
             }
 
             if(isset($_POST['btnAddMenu'])){
+              $uniq = uniqid();
+
               $productName = $_POST['txtproductname'];
               $Quantity = $_POST['txtquantity'];
               $itemPrice = $_POST['txtPrice'];
-              $Ram = $_POST['txtram'];
-              $Storage = $_POST['txtstorage'];
+              $Ram = isset($_POST['txtram']) ? $_POST['txtram'] :  '';
+              $Storage = isset($_POST['txtstorage']) ? $_POST['txtstorage'] : '';
               $itemCategory = $_POST['category'];
-              $Camera = $_POST['txtCamera'];
-              $Processor = $_POST['txtprocessor'];
+              $Camera = isset($_POST['txtCamera']) ? $_POST['txtCamera'] : '';
+              $Processor = isset($_POST['txtprocessor']) ? $_POST['txtprocessor']  : '';
               $Description = $_POST['txtdescription'];
               $ShortDesc = $_POST['txtshort'];
               $Brand= $_POST['txtbrand'];
               $itemDate = date('Y/m/d A H:i:s');
-              $target_dir = "themes/images/products/";
+              $target_dir = "image/";
               $target_file = $target_dir . basename($_FILES["fileImage"]["name"]);
               $imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
-              $imageSrc = "themes/images/products/".$_POST['txtproductname'].".".$imageFileType; // Image src for database
-              $fileName = $target_dir.$_POST['txtproductname'].".".$imageFileType;
+              $name = $_POST['txtproductname']."-".$uniq.".".$imageFileType
+              $imageSrc = "image/".$name; // Image src for database
+              $fileName = $target_dir.$name;
               $check = getimagesize($_FILES["fileImage"]["tmp_name"]); // Returns false if file is not image
 
               if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg") {
@@ -71,9 +74,16 @@ if(!isset($_SESSION['UserData']['Username'])){
               else {
                 if (file_exists("$fileName")) unlink("$fileName");
                 if (move_uploaded_file($_FILES["fileImage"]["tmp_name"], $fileName)) {
-
-                  $sql="INSERT INTO `tbl_product` (`productName`,`brandID`,`categoryID`,`merchantID`,`quantity`,`price`,`ram`,`storage`,`camera`,`processor`,`description`,`shortDescription`,`status`)
-                  VALUES ('$productName','$Brand','$itemCategory','1','$Quantity','$itemPrice','$Ram','$Storage','$Camera','$Processor','$Description','$ShortDesc','1');";
+                  $user = $_SESSION['UserData']['UserID'];
+                  $sql = null;
+                  //if accessory
+                  if($itemCategory == '6'){
+                    $sql="INSERT INTO `tbl_accessories` (`productName`,`brandID`,`categoryID`,`merchantID`,`quantity`,`price`,`description`,`shortDescription`,`status`)
+                    VALUES ('$productName','$Brand','$itemCategory','$user','$Quantity','$itemPrice','$Description','$ShortDesc','1');";
+                  }else{
+                    $sql="INSERT INTO `tbl_product` (`productName`,`brandID`,`categoryID`,`merchantID`,`quantity`,`price`,`ram`,`storage`,`camera`,`processor`,`description`,`shortDescription`,`status`)
+                    VALUES ('$productName','$Brand','$itemCategory','$user','$Quantity','$itemPrice','$Ram','$Storage','$Camera','$Processor','$Description','$ShortDesc','1');";
+                  }
 
                   if($conn->query($sql)){
                     echo "<center><div class='alert success'><span class='closebtn' onclick=\"this.parentElement.style.display='none';\">&times;</span>
@@ -82,16 +92,22 @@ if(!isset($_SESSION['UserData']['Username'])){
 
 
                     $last_id = $conn->insert_id;
-                    echo " New record created successfully. Last inserted ID is: " . $last_id;
-                    $sql= "INSERT INTO `tbl_productimg` (`productID`,`imgName`,`imgSource`)
-                    VALUES ('$last_id','$imageSrc','$fileName');";
+
+                    $sql = null;
+                      //if accessory
+                    if($itemCategory == '6'){
+                      $sql= "INSERT INTO `tbl_accessoriesimg` (`productID`,`imgName`,`imgSource`) VALUES ('$last_id','$name','$fileName');";
+                    }else{
+                      $sql= "INSERT INTO `tbl_productimg` (`productID`,`imgName`,`imgSource`) VALUES ('$last_id','$name','$fileName');";
+                    }
+
                     if($conn->query($sql)){
                       $conn->close();
                       echo " sucess " ;
                     }
                   }else{
                     echo "<center><div class='alert success'><span class='closebtn' onclick=\"this.parentElement.style.display='none';\">&times;</span>
-                    ".$conn->error."
+                    ".$conn->error.";
                     </div>";
                   }
                 } else {
@@ -110,21 +126,28 @@ if(!isset($_SESSION['UserData']['Username'])){
                   <table width="100%">
                     <td style="padding-left:20px;">Category Type: </td>
                     <td><select name="category" class="form-control mt-2">
-                      <option value="1">Camera</option>
-                      <option value="2">Computers, Tablets & Laptops</option>
-                      <option value="3">Mobile Phone</option>
-                      <option value="4">Storage Devices</option>
-                      <option value="5">Sound & Vision</option>
+                      <option value="1">Laptops</option>
+                      <option value="2">Computers/Desktop</option>
+                      <option value="3">Tablet</option>
+                      <option value="4">Mobile Phones</option>
+                      <option value="5">Camera</option>
+                      <option value="6">Accessories</option>
                     </select>
                   </td>
                     <tr>
                       <td style="padding-left:20px;"> Brand: </td>
                       <td><select name="txtbrand" class="form-control mt-2">
-                        <option value="1">Apple</option>
-                        <option value="2">samsung</option>
-                        <option value="Mobile Phone">Mobile Phone</option>
-                        <option value="Storage Devices">Storage Devices</option>
-                        <option value="Sound & Vision">Sound & Vision</option>
+                        <option value="1">Dell</option>
+                        <option value="2">Microsoft</option>
+                        <option value="3">Lenovo</option>
+                        <option value="4">Apple</option>
+                        <option value="5">ASUS</option>
+                        <option value="6">PC Specialist</option>
+                        <option value="7">HP</option>
+                        <option value="8">ACER</option>
+                        <option value="9">Amazon</option>
+                        <option value="10">Samsung</option>
+
                       </select>
                     </tr>
                     <tr>
@@ -193,6 +216,15 @@ if(!isset($_SESSION['UserData']['Username'])){
 $(document).ready(function($) {
   $(".table-row").click(function() {
     window.document.location = $(this).data("href");
+  });
+
+  $('select[name="category"]').on("change",function(e){
+    if($(this).val() === '6'){
+$('input[name="txtram"],input[name="txtstorage"],input[name="txtCamera"],input[name="txtprocessor"]').attr('disabled',true).closest('tr').hide();
+    }else{
+      $('input[name="txtram"],input[name="txtstorage"],input[name="txtCamera"],input[name="txtprocessor"]').attr('disabled',false).closest('tr').show();
+
+    }
   });
 });
 

@@ -11,6 +11,16 @@ function getImage($img,$connect){
 	return $result[0]["imgName"];
 }
 
+function getImage2($img,$connect){
+	$query2 = "
+	SELECT * FROM tbl_accessoriesimg WHERE productID = '$img'
+	";
+	$statement = $connect->prepare($query2);
+	$statement->execute();
+	$result = $statement->fetchAll();
+	return $result[0]["imgName"];
+}
+
 
 
 if (isset($_POST["action"])) {
